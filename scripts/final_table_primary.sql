@@ -51,3 +51,12 @@ JOIN economies e
 	ON e.`year` = iw.payroll_year
 	AND e.country = 'Czech Republic'
 ORDER BY gp.year_, iw.industry;
+
+/* 
+Vzhledem k tomu, že tabulka primary_final nebude odkazovat na jiné tabulky a ani se do ní nebudou přidávat nová data,
+tak jsem jako primární klíč zvolil kombinaci tří sloupců, což zajišťuje jednoznačnost a unikátnost.
+Kdybych věděl, že budu tabulku dál škálovat, tak rozhodně přidám sloupec 'id', protože je rychlejší a flexibilnější.
+V tomto případě mi ale více vyhovuje použití kompozičního klíče, protože rozdíl v rychlosti bude minimální s ušetřím místo.
+*/
+ALTER TABLE primary_final
+ADD PRIMARY KEY (year_, food, industry);
