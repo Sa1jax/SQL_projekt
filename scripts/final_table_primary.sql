@@ -34,3 +34,20 @@ JOIN czechia_price_category cpc
 	ON cp.category_code = cpc.code
 GROUP BY cpc.name, YEAR(cp.date_from)
 ORDER BY year_;
+
+
+-- Vytvoření finální tabulky
+-- Předchozí tabulky jsem spojil a přidal jsme ještě HDP Česka
+CREATE TABLE primary_final AS
+SELECT 
+	gp.*,
+	iw.industry,
+	iw.wage,
+	ROUND(e.gdp) AS GDP
+FROM temp_industry_wages iw
+JOIN temp_grocery_prices gp
+	ON iw.payroll_year = gp.year_
+JOIN economies e
+	ON e.`year` = iw.payroll_year
+	AND e.country = 'Czech Republic'
+ORDER BY gp.year_, iw.industry;
