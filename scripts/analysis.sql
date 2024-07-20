@@ -33,3 +33,37 @@ GROUP BY industry
 ORDER BY avg_growth;
 -- V závislosti na této tabulce lze odpovědět na první otázku
 -- ODPOVĚĎ: I když se objeví rok, ve kterém mzdy klesnou, tak celkově během let mzdy rostou ve všech odvětví.
+
+
+
+-- 2. Kolik je možné si koupit litrů mléka a kilogramů chleba za první a poslední srovnatelné období v dostupných datech cen a mezd?
+-- Vytvoření dočasné tabulky pro průměrnou mzdu v letech 2006 a 2018
+CREATE TEMPORARY TABLE temp_avg_wage_06_18 AS 
+SELECT
+	year_,
+	wage AS avg_wage
+FROM primary_final pf
+WHERE year_ IN (2006, 2018)
+GROUP BY year_;
+
+-- Vytvoření dočasné tabulky pro průměrnou cenu chleba a mléka v letech 2006 a 2018
+CREATE TEMPORARY TABLE temp_avg_price_06_18 AS
+SELECT DISTINCT
+	year_,
+	food,
+	price,
+	amount,
+	unit
+FROM primary_final pf
+WHERE year_ IN (2006, 2018)
+	AND food IN ('Chléb konzumní kmínový', 'Mléko polotučné pasterované');
+	
+-- Spojeníobou tabulek pro finální výpočty
+SELECT 
+	a.*,
+	b.avg_wage,
+	ROUND(b.avg_wage / a.price) AS purchasing_power
+FROM temp_avg_price_06_18 a
+JOIN temp_avg_wage_06_18 b
+	ON a.year_ = b.year_;
+-- Zde je výsledná tabulka, která ukazuje kolik litrů mléka a kilogramů chleba si mohl člověk koupit za průměrnou mzdu v těchto letech
