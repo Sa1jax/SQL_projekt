@@ -2,6 +2,8 @@
 
 -- 1. Rostou v průběhu let mzdy ve všech odvětvích, nebo v některých klesají?
 -- Vytvoření cte a výpočet procentuální změny oproti předchozímu roku
+-- Následné vytvoření dočasné tabulky, abych ji mohl použít pro výpočet geometrického průměru
+CREATE TEMPORARY TABLE temp_wage_growth AS
 WITH cte1 AS (
 	SELECT DISTINCT year_, industry, wage 
 	FROM primary_final pf
