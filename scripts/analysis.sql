@@ -21,3 +21,15 @@ SELECT
 	END AS growth_factor
 FROM cte1;
 -- Ještě jsem přidal sloupec growth_factor, protože budu počítat geometrický průměr
+
+
+-- Výpočet geometrického průměru
+SELECT 
+	ROW_NUMBER() OVER(ORDER BY industry) AS id, 
+	industry,
+	ROUND((EXP(SUM(LOG(growth_factor)) / COUNT(*)) - 1) * 100, 2) AS avg_growth
+FROM temp_wage_growth wg
+GROUP BY industry
+ORDER BY avg_growth;
+-- V závislosti na této tabulce lze odpovědět na první otázku
+-- ODPOVĚĎ: I když se objeví rok, ve kterém mzdy klesnou, tak celkově během let mzdy rostou ve všech odvětví.
