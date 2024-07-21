@@ -19,7 +19,7 @@ Scripty musíte spouštět ve správném pořadí. První spusťte script s náz
 ##### **4. Ověření výsledků**
 Zkontrolujte zda byly tabulky správně vytvořeny a obsahují správná data.
 #### **Odkaz na průvodní listinu**
-[--Průvodní listina--](https://github.com/Sa1jax/SQL_projekt/pruvodni_listina.pdf)
+[--Průvodní listina--](https://github.com/Sa1jax/SQL_projekt/blob/main/pruvodni_listina.pdf)
 
 ### Závěr
 Doufám, že tento projekt vám poskytne užitečné nástroje a informace pro analýzu ekonomických trendů.
