@@ -14,6 +14,12 @@ JOIN countries c
 	AND c.continent = 'Europe'
 	AND e.`year` BETWEEN 2006 AND 2018
 ORDER BY e.country, e.year;
-
-SELECT * FROM t_david_hruby_project_SQL_secondary_final;
 -- Zde je dokončená sekundární tabulka s všemi sloupci, které byli v zadání
+
+-- Změna datového typu u country z text na VARCHAR(100)
+ALTER TABLE t_david_hruby_project_sql_secondary_final 
+MODIFY country VARCHAR(100);
+
+-- Přidání primárního klíče
+ALTER TABLE t_david_hruby_project_sql_secondary_final 
+ADD PRIMARY KEY (year, country, population);
