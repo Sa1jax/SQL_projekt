@@ -131,3 +131,22 @@ JOIN cte_food f
 WHERE f.avg_percent_change_food > w.avg_percent_change_wage
 ORDER BY w.year_;
 -- ODPOVĚĎ: V tomto dotazu lze vypozorovat, že neexistuje rok, kdy by ceny potravin rostly o 10+% více než mzdy.
+
+
+/* 5. Má výška HDP vliv na změny ve mzdách a cenách potravin? Neboli, pokud HDP vzroste výrazněji v jednom roce, 
+	  projeví se to na cenách potravin či mzdách ve stejném nebo násdujícím roce výraznějším růstem? */
+-- Vytvoření view pro uchování tabulky s růstem hdp
+CREATE VIEW v_gdp_growth AS
+WITH cte3 AS (
+	SELECT DISTINCT
+		year_,
+		GDP
+	FROM primary_final pf
+)
+SELECT
+	year_,
+	CASE
+		WHEN (GDP - LAG(GDP, 1) OVER(ORDER BY year_)) / LAG(GDP, 1) OVER(ORDER BY year_) * 100 IS NULL THEN 0 
+		ELSE ROUND((GDP - LAG(GDP, 1) OVER(ORDER BY year_)) / LAG(GDP, 1) OVER(ORDER BY year_) * 100, 2)
+	END AS gdp_growth
+FROM cte3;
