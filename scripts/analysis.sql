@@ -100,3 +100,34 @@ FROM temp_food_price_growth
 GROUP BY food
 ORDER BY avg_growth;
 -- ODPOVĚĎ: Nejpomaleji zdražuje cukr, který dokonce během let zlevnil.
+
+
+-- 4. Existuje rok, ve kterém byl meziroční nárůst cen potravin výrazně vyšší než růst mezd (větší než 10 %)?
+-- Zvolil jsem obecný přehled, kdy porovnám průměr mezd všech odvětví pro daný rok s průměrným růstem všech potravin za daný rok
+-- Vynechal jsem rok 2006, protože tam nemám data k růstu potravin
+-- Pro jistotu, aby nedošlo ke zkreslenému výpočtu použil cte na mezivýpočet a pak až tabulky spojil 
+WITH cte_wage AS (
+	SELECT 
+		year_,
+		ROUND(AVG(percent_change), 2) AS avg_percent_change_wage
+	FROM temp_wage_growth 
+	WHERE year_ > 2006
+	GROUP BY year_
+),
+cte_food AS (
+	SELECT 
+		year_,
+		ROUND(AVG(percent_change), 2) AS avg_percent_change_food
+	FROM temp_food_price_growth 
+	WHERE year_ > 2006
+	GROUP BY year_
+)
+SELECT 
+	w.*,
+	f.avg_percent_change_food
+FROM cte_wage w
+JOIN cte_food f
+	ON w.year_ = f.year_
+WHERE f.avg_percent_change_food > w.avg_percent_change_wage
+ORDER BY w.year_;
+-- ODPOVĚĎ: V tomto dotazu lze vypozorovat, že neexistuje rok, kdy by ceny potravin rostly o 10+% více než mzdy.
