@@ -90,3 +90,13 @@ SELECT
 	END AS growth_factor
 FROM cte2
 ORDER BY food, year_;
+
+-- Výpočet geometrického průměru a tvorba tabulky pro odpověď na třetí otázku
+SELECT 
+	ROW_NUMBER() OVER(ORDER BY food) AS id,
+	food,
+	ROUND((EXP(SUM(LOG(growth_factor)) / COUNT(*)) - 1) * 100, 2) AS avg_growth
+FROM temp_food_price_growth
+GROUP BY food
+ORDER BY avg_growth;
+-- ODPOVĚĎ: Nejpomaleji zdražuje cukr, který dokonce během let zlevnil.
