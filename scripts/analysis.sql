@@ -37,9 +37,9 @@ ORDER BY avg_growth;
 -- 2. Kolik je možné si koupit litrů mléka a kilogramů chleba za první a poslední srovnatelné období v dostupných datech cen a mezd?
 -- Vytvořil jsem cte pro mezivýpočet a následně jsem je spojil dohromady
 WITH avg_wage_06_18 AS (
-	SELECT
+	SELECT DISTINCT
 		year_,
-		wage AS avg_wage
+		ROUND(AVG(wage)) AS avg_wage
 	FROM t_david_hruby_project_SQL_primary_final pf
 	WHERE year_ IN (2006, 2018)
 	GROUP BY year_
@@ -48,7 +48,7 @@ avg_price_06_18 AS (
 	SELECT DISTINCT
 		year_,
 		food,
-		price,
+		price AS avg_price,
 		amount,
 		unit
 	FROM t_david_hruby_project_SQL_primary_final pf
@@ -58,7 +58,7 @@ avg_price_06_18 AS (
 SELECT 
 	a.*,
 	b.avg_wage,
-	ROUND(b.avg_wage / a.price) AS purchasing_power
+	ROUND(b.avg_wage / a.avg_price) AS purchasing_power
 FROM avg_price_06_18 a
 JOIN avg_wage_06_18 b
 	ON a.year_ = b.year_;
@@ -67,7 +67,7 @@ JOIN avg_wage_06_18 b
 
 -- 3. Která kategorie potravin zdražuje nejpomaleji (je u ní nejnižší percentuální meziroční nárůst)?
 -- Vytvoření view, které obsahuje procentuální změnu a growth_factor pro výpočet geometrického průměru
-CREATE VIEW v_food_price_growth AS
+CREATE TEMPORARY TABLE temp_food_price_growth AS
 WITH cte2 AS (
 	SELECT DISTINCT 
 		year_,
@@ -93,7 +93,7 @@ SELECT
 	ROW_NUMBER() OVER(ORDER BY food) AS id,
 	food,
 	ROUND((EXP(SUM(LOG(growth_factor)) / COUNT(*)) - 1) * 100, 2) AS avg_growth
-FROM v_food_price_growth
+FROM temp_food_price_growth
 GROUP BY food
 ORDER BY avg_growth;
 -- ODPOVĚĎ: Nejpomaleji zdražuje cukr, který dokonce během let zlevnil.
@@ -107,7 +107,7 @@ WITH cte_wage AS (
 	SELECT 
 		year_,
 		ROUND(AVG(percent_change), 2) AS avg_percent_change_wage
-	FROM v_wage_growth 
+	FROM temp_wage_growth 
 	WHERE year_ > 2006
 	GROUP BY year_
 ),
@@ -115,7 +115,7 @@ cte_food AS (
 	SELECT 
 		year_,
 		ROUND(AVG(percent_change), 2) AS avg_percent_change_food
-	FROM v_food_price_growth 
+	FROM temp_food_price_growth 
 	WHERE year_ > 2006
 	GROUP BY year_
 )
@@ -132,8 +132,8 @@ ORDER BY w.year_;
 
 /* 5. Má výška HDP vliv na změny ve mzdách a cenách potravin? Neboli, pokud HDP vzroste výrazněji v jednom roce, 
 	  projeví se to na cenách potravin či mzdách ve stejném nebo násdujícím roce výraznějším růstem? */
--- Vytvoření view pro uchování tabulky s růstem hdp
-CREATE VIEW v_gdp_growth AS
+-- Vytvoření dočasné tabulky pro uchování tabulky s růstem hdp
+CREATE TEMPORARY TABLE temp_gdp_growth AS
 WITH cte3 AS (
 	SELECT DISTINCT
 		year_,
@@ -153,7 +153,7 @@ WITH cte_wage2 AS (
 	SELECT 
 		year_,
 		ROUND(AVG(percent_change), 2) AS avg_percent_change_wage
-	FROM v_wage_growth 
+	FROM temp_wage_growth 
 	WHERE year_ > 2006
 	GROUP BY year_
 ),
@@ -161,7 +161,7 @@ cte_food2 AS (
 	SELECT 
 		year_,
 		ROUND(AVG(percent_change), 2) AS avg_percent_change_food
-	FROM v_food_price_growth 
+	FROM temp_food_price_growth 
 	WHERE year_ > 2006
 	GROUP BY year_
 )
@@ -170,7 +170,7 @@ SELECT
 	g.gdp_growth,
 	w.avg_percent_change_wage AS wage_growth, 
 	f.avg_percent_change_food AS food_price_growth
-FROM v_gdp_growth g
+FROM temp_gdp_growth g
 JOIN cte_wage2 w
 	ON g.year_ = w.year_
 JOIN cte_food2 f
