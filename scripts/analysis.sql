@@ -6,7 +6,7 @@
 CREATE VIEW v_wage_growth AS
 WITH cte1 AS (
 	SELECT DISTINCT year_, industry, wage 
-	FROM primary_final pf
+	FROM t_david_hruby_project_SQL_primary_final pf
 	ORDER BY industry, year_
 )
 SELECT 
@@ -35,37 +35,34 @@ ORDER BY avg_growth;
 
 
 -- 2. Kolik je možné si koupit litrů mléka a kilogramů chleba za první a poslední srovnatelné období v dostupných datech cen a mezd?
--- Vytvoření view pro průměrnou mzdu v letech 2006 a 2018
-CREATE VIEW v_avg_wage_06_18 AS 
-SELECT
-	year_,
-	wage AS avg_wage
-FROM primary_final pf
-WHERE year_ IN (2006, 2018)
-GROUP BY year_;
-
--- Vytvoření view pro průměrnou cenu chleba a mléka v letech 2006 a 2018
-CREATE VIEW v_avg_price_06_18 AS
-SELECT DISTINCT
-	year_,
-	food,
-	price,
-	amount,
-	unit
-FROM primary_final pf
-WHERE year_ IN (2006, 2018)
-	AND food IN ('Chléb konzumní kmínový', 'Mléko polotučné pasterované');
-	
--- Spojení obou tabulek pro finální výpočty
+-- Vytvořil jsem cte pro mezivýpočet a následně jsem je spojil dohromady
+WITH avg_wage_06_18 AS (
+	SELECT
+		year_,
+		wage AS avg_wage
+	FROM t_david_hruby_project_SQL_primary_final pf
+	WHERE year_ IN (2006, 2018)
+	GROUP BY year_
+), 
+avg_price_06_18 AS (
+	SELECT DISTINCT
+		year_,
+		food,
+		price,
+		amount,
+		unit
+	FROM t_david_hruby_project_SQL_primary_final pf
+	WHERE year_ IN (2006, 2018)
+		AND food IN ('Chléb konzumní kmínový', 'Mléko polotučné pasterované')
+)
 SELECT 
 	a.*,
 	b.avg_wage,
 	ROUND(b.avg_wage / a.price) AS purchasing_power
-FROM v_avg_price_06_18 a
-JOIN v_avg_wage_06_18 b
+FROM avg_price_06_18 a
+JOIN avg_wage_06_18 b
 	ON a.year_ = b.year_;
--- Zde je výsledná tabulka, která ukazuje kolik litrů mléka a kilogramů chleba si mohl člověk koupit za průměrnou mzdu v těchto letech
--- Je vidět, že kupní síla na tyto dvě potraviny v letech 2006-2018 mírně rostla
+-- Zde je výsledný dotaz, který ukazuje kolik litrů mléka a kilogramů chleba si mohl člověk koupit za průměrnou mzdu v těchto letech
 
 
 -- 3. Která kategorie potravin zdražuje nejpomaleji (je u ní nejnižší percentuální meziroční nárůst)?
@@ -76,7 +73,7 @@ WITH cte2 AS (
 		year_,
 		food,
 		price
-	FROM primary_final pf
+	FROM t_david_hruby_project_SQL_primary_final pf
 )
 SELECT
 	*,
@@ -141,7 +138,7 @@ WITH cte3 AS (
 	SELECT DISTINCT
 		year_,
 		GDP
-	FROM primary_final pf
+	FROM t_david_hruby_project_SQL_primary_final pf
 )
 SELECT
 	year_,
