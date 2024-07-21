@@ -2,8 +2,8 @@
 
 -- 1. Rostou v průběhu let mzdy ve všech odvětvích, nebo v některých klesají?
 -- Vytvoření cte a výpočet procentuální změny oproti předchozímu roku
--- Následné vytvoření dočasné tabulky, abych ji mohl použít pro výpočet geometrického průměru
-CREATE TEMPORARY TABLE temp_wage_growth AS
+-- Následné vytvoření view, abych ho mohl použít pro výpočet geometrického průměru
+CREATE VIEW v_wage_growth AS
 WITH cte1 AS (
 	SELECT DISTINCT year_, industry, wage 
 	FROM primary_final pf
@@ -27,7 +27,7 @@ SELECT
 	ROW_NUMBER() OVER(ORDER BY industry) AS id, 
 	industry,
 	ROUND((EXP(SUM(LOG(growth_factor)) / COUNT(*)) - 1) * 100, 2) AS avg_growth
-FROM temp_wage_growth wg
+FROM v_wage_growth wg
 GROUP BY industry
 ORDER BY avg_growth;
 -- V závislosti na této tabulce lze odpovědět na první otázku
@@ -35,8 +35,8 @@ ORDER BY avg_growth;
 
 
 -- 2. Kolik je možné si koupit litrů mléka a kilogramů chleba za první a poslední srovnatelné období v dostupných datech cen a mezd?
--- Vytvoření dočasné tabulky pro průměrnou mzdu v letech 2006 a 2018
-CREATE TEMPORARY TABLE temp_avg_wage_06_18 AS 
+-- Vytvoření view pro průměrnou mzdu v letech 2006 a 2018
+CREATE VIEW v_avg_wage_06_18 AS 
 SELECT
 	year_,
 	wage AS avg_wage
@@ -44,8 +44,8 @@ FROM primary_final pf
 WHERE year_ IN (2006, 2018)
 GROUP BY year_;
 
--- Vytvoření dočasné tabulky pro průměrnou cenu chleba a mléka v letech 2006 a 2018
-CREATE TEMPORARY TABLE temp_avg_price_06_18 AS
+-- Vytvoření view pro průměrnou cenu chleba a mléka v letech 2006 a 2018
+CREATE VIEW v_avg_price_06_18 AS
 SELECT DISTINCT
 	year_,
 	food,
@@ -61,16 +61,16 @@ SELECT
 	a.*,
 	b.avg_wage,
 	ROUND(b.avg_wage / a.price) AS purchasing_power
-FROM temp_avg_price_06_18 a
-JOIN temp_avg_wage_06_18 b
+FROM v_avg_price_06_18 a
+JOIN v_avg_wage_06_18 b
 	ON a.year_ = b.year_;
 -- Zde je výsledná tabulka, která ukazuje kolik litrů mléka a kilogramů chleba si mohl člověk koupit za průměrnou mzdu v těchto letech
 -- Je vidět, že kupní síla na tyto dvě potraviny v letech 2006-2018 mírně rostla
 
 
 -- 3. Která kategorie potravin zdražuje nejpomaleji (je u ní nejnižší percentuální meziroční nárůst)?
--- Vytvoření dočasné tabulky, která obsahuje procentuální změnu a growth_factor pro výpočet geometrického průměru
-CREATE TEMPORARY TABLE temp_food_price_growth AS
+-- Vytvoření view, které obsahuje procentuální změnu a growth_factor pro výpočet geometrického průměru
+CREATE VIEW v_food_price_growth AS
 WITH cte2 AS (
 	SELECT DISTINCT 
 		year_,
@@ -91,12 +91,12 @@ SELECT
 FROM cte2
 ORDER BY food, year_;
 
--- Výpočet geometrického průměru a tvorba tabulky pro odpověď na třetí otázku
+-- Výpočet geometrického průměru a tvorba dotazu pro odpověď na třetí otázku
 SELECT 
 	ROW_NUMBER() OVER(ORDER BY food) AS id,
 	food,
 	ROUND((EXP(SUM(LOG(growth_factor)) / COUNT(*)) - 1) * 100, 2) AS avg_growth
-FROM temp_food_price_growth
+FROM v_food_price_growth
 GROUP BY food
 ORDER BY avg_growth;
 -- ODPOVĚĎ: Nejpomaleji zdražuje cukr, který dokonce během let zlevnil.
@@ -110,7 +110,7 @@ WITH cte_wage AS (
 	SELECT 
 		year_,
 		ROUND(AVG(percent_change), 2) AS avg_percent_change_wage
-	FROM temp_wage_growth 
+	FROM v_wage_growth 
 	WHERE year_ > 2006
 	GROUP BY year_
 ),
@@ -118,7 +118,7 @@ cte_food AS (
 	SELECT 
 		year_,
 		ROUND(AVG(percent_change), 2) AS avg_percent_change_food
-	FROM temp_food_price_growth 
+	FROM v_food_price_growth 
 	WHERE year_ > 2006
 	GROUP BY year_
 )
@@ -150,3 +150,35 @@ SELECT
 		ELSE ROUND((GDP - LAG(GDP, 1) OVER(ORDER BY year_)) / LAG(GDP, 1) OVER(ORDER BY year_) * 100, 2)
 	END AS gdp_growth
 FROM cte3;
+
+-- Vytvoření dotazu pro odpověď na otázku číslo 5
+WITH cte_wage2 AS (
+	SELECT 
+		year_,
+		ROUND(AVG(percent_change), 2) AS avg_percent_change_wage
+	FROM v_wage_growth 
+	WHERE year_ > 2006
+	GROUP BY year_
+),
+cte_food2 AS (
+	SELECT 
+		year_,
+		ROUND(AVG(percent_change), 2) AS avg_percent_change_food
+	FROM v_food_price_growth 
+	WHERE year_ > 2006
+	GROUP BY year_
+)
+SELECT
+	g.year_,
+	g.gdp_growth,
+	w.avg_percent_change_wage AS wage_growth, 
+	f.avg_percent_change_food AS food_price_growth
+FROM v_gdp_growth g
+JOIN cte_wage2 w
+	ON g.year_ = w.year_
+JOIN cte_food2 f
+	ON g.year_ = f.year_;
+/* ODPOVĚĎ: Růst HDP nějaký vliv na ceny a mzdy určitě má.
+			Například v letech 2009 a 2010 po krizi v roce 2008 je vidět, že při poklesu HDP klesly i ceny a mzdy.
+			Naopak v období růstu HDP v letech 2015-2018 je vidět, že mzdy a ceny rostly.
+			Korelace mezi hdp a mzdami bude větší než mezi hdp a cenami. */
