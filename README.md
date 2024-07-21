@@ -15,7 +15,7 @@ Pokud máte místo, kam byste chtěli repozitář stáhnout, tak před tímto p�
 ##### **2. Import datasetů**
 Vytvořte si lokální databázi a pomocí vašeho editoru naimportujte datasety do databáze.
 ##### **3. Spuštění scriptů**
-Scripty musíte spouštět ve správném pořadí. První spusťte script s názvem **final_table_primary.sql**, který vytvoří primární tabulku, ze keré jsem prováděl finální analýzy. Poté spusťte **final_table_secondary.sql** a jako poslední spusťte **analysis.sql**, kde se již nachází finální analýzy, díky kterým jsem vypracoval odpovědi na otázky.
+Scripty musíte spouštět ve správném pořadí. První spusťte script s názvem **final_table_primary.sql**, který vytvoří primární tabulku, ze keré jsem prováděl finální analýzy. Poté spusťte **final_table_secondary.sql** a jako poslední spusťte **analysis.sql**, kde se již nachází finální analýzy, díky kterým jsem vypracoval odpovědi na otázky. Také musíte spustit všechny dotazy, které vytvářejí dočasné tabulky (TEMPORARY TABLE), jinak vám některé dotazy nemusí fungovat!
 ##### **4. Ověření výsledků**
 Zkontrolujte zda byly tabulky správně vytvořeny a obsahují správná data.
 #### **Odkaz na průvodní listinu**
