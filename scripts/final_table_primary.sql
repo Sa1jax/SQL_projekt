@@ -4,7 +4,7 @@
 -- 3. Spojit pomocí JOIN tyto dvě tabulky a ještě přidat sloupec s HDP
 -- 4. Začít z této tabulky dělat dotazy, které odpoví na otázky
 
--- Dočasná tabulka s platy za daný rok v daném odvětví.
+-- View s platy za daný rok v daném odvětví.
 -- Eliminoval jsem kvartály a to tak, že jsem vypočítal průměrnou mzdu za daný rok a použil GROUP BY.
 CREATE VIEW v_industry_wages AS 
 SELECT 
@@ -20,8 +20,9 @@ JOIN czechia_payroll_industry_branch cpi
 GROUP BY cpi.name, cp.payroll_year 
 ORDER BY cpi.name, cp.payroll_year;
 
+SELECT * FROM v_industry_wages viw;
 
--- Dočasná tabulka s cenami potravin za daný rok
+-- View s cenami potravin za daný rok
 CREATE VIEW v_grocery_prices AS
 SELECT
 	YEAR(cp.date_from) AS year_,
@@ -37,7 +38,7 @@ ORDER BY year_;
 
 
 -- Vytvoření finální tabulky
--- Předchozí tabulky jsem spojil a přidal jsme ještě HDP Česka
+-- Předchozí tabulky jsem spojil a přidal jsem ještě HDP Česka
 CREATE TABLE t_david_hruby_project_SQL_primary_final AS
 SELECT 
 	gp.*,
