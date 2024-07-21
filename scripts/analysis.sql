@@ -70,6 +70,7 @@ JOIN temp_avg_wage_06_18 b
 
 -- 3. Která kategorie potravin zdražuje nejpomaleji (je u ní nejnižší percentuální meziroční nárůst)?
 -- Vytvoření dočasné tabulky, která obsahuje procentuální změnu a growth_factor pro výpočet geometrického průměru
+CREATE TEMPORARY TABLE temp_food_price_growth AS
 WITH cte2 AS (
 	SELECT DISTINCT 
 		year_,
