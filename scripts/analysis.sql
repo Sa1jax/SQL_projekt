@@ -66,3 +66,26 @@ JOIN temp_avg_wage_06_18 b
 	ON a.year_ = b.year_;
 -- Zde je výsledná tabulka, která ukazuje kolik litrů mléka a kilogramů chleba si mohl člověk koupit za průměrnou mzdu v těchto letech
 -- Je vidět, že kupní síla na tyto dvě potraviny v letech 2006-2018 mírně rostla
+
+
+-- 3. Která kategorie potravin zdražuje nejpomaleji (je u ní nejnižší percentuální meziroční nárůst)?
+-- Vytvoření dočasné tabulky, která obsahuje procentuální změnu a growth_factor pro výpočet geometrického průměru
+WITH cte2 AS (
+	SELECT DISTINCT 
+		year_,
+		food,
+		price
+	FROM primary_final pf
+)
+SELECT
+	*,
+	CASE 
+		WHEN (price - LAG(price, 1) OVER(PARTITION BY food ORDER BY year_)) / LAG(price, 1) OVER(PARTITION BY food ORDER BY year_) * 100 IS NULL THEN 0 
+		ELSE ROUND((price - LAG(price, 1) OVER(PARTITION BY food ORDER BY year_)) / LAG(price, 1) OVER(PARTITION BY food ORDER BY year_) * 100, 2)
+	END AS percent_change,
+	CASE 
+		WHEN (price - LAG(price, 1) OVER(PARTITION BY food ORDER BY year_)) / LAG(price, 1) OVER(PARTITION BY food ORDER BY year_) * 100 IS NULL THEN 1 
+		ELSE ROUND(1 + (price - LAG(price, 1) OVER(PARTITION BY food ORDER BY year_)) / LAG(price, 1) OVER(PARTITION BY food ORDER BY year_), 4)
+	END AS growth_factor
+FROM cte2
+ORDER BY food, year_;
