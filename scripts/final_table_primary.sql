@@ -6,7 +6,7 @@
 
 -- Dočasná tabulka s platy za daný rok v daném odvětví.
 -- Eliminoval jsem kvartály a to tak, že jsem vypočítal průměrnou mzdu za daný rok a použil GROUP BY.
-CREATE TEMPORARY TABLE temp_industry_wages AS 
+CREATE VIEW v_industry_wages AS 
 SELECT 
 	cp.payroll_year,
 	cpi.name AS industry,
@@ -22,7 +22,7 @@ ORDER BY cpi.name, cp.payroll_year;
 
 
 -- Dočasná tabulka s cenami potravin za daný rok
-CREATE TEMPORARY TABLE temp_grocery_prices AS
+CREATE VIEW v_grocery_prices AS
 SELECT
 	YEAR(cp.date_from) AS year_,
 	cpc.name AS food,
@@ -44,8 +44,8 @@ SELECT
 	iw.industry,
 	iw.wage,
 	ROUND(e.gdp) AS GDP
-FROM temp_industry_wages iw
-JOIN temp_grocery_prices gp
+FROM v_industry_wages iw
+JOIN v_grocery_prices gp
 	ON iw.payroll_year = gp.year_
 JOIN economies e
 	ON e.`year` = iw.payroll_year
