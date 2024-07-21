@@ -20,8 +20,6 @@ JOIN czechia_payroll_industry_branch cpi
 GROUP BY cpi.name, cp.payroll_year 
 ORDER BY cpi.name, cp.payroll_year;
 
-SELECT * FROM v_industry_wages viw;
-
 -- View s cenami potravin za daný rok
 CREATE VIEW v_grocery_prices AS
 SELECT
@@ -35,7 +33,6 @@ JOIN czechia_price_category cpc
 	ON cp.category_code = cpc.code
 GROUP BY cpc.name, YEAR(cp.date_from)
 ORDER BY year_;
-
 
 -- Vytvoření finální tabulky
 -- Předchozí tabulky jsem spojil a přidal jsem ještě HDP Česka
