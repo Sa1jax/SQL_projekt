@@ -38,7 +38,7 @@ ORDER BY year_;
 
 -- Vytvoření finální tabulky
 -- Předchozí tabulky jsem spojil a přidal jsme ještě HDP Česka
-CREATE TABLE primary_final AS
+CREATE TABLE t_david_hruby_project_SQL_primary_final AS
 SELECT 
 	gp.*,
 	iw.industry,
@@ -53,5 +53,5 @@ JOIN economies e
 ORDER BY gp.year_, iw.industry;
 
 -- Implementace primárního klíče
-ALTER TABLE primary_final
+ALTER TABLE t_david_hruby_project_SQL_primary_final
 ADD PRIMARY KEY (year_, food, industry);
