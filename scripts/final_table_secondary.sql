@@ -1,7 +1,7 @@
 -- Script, kde budu tvořit sekundární tabulku
 -- ÚKOL: zobrazit HDP, GINI a populaci dalších evropských států ve stejném období jako přehled o Česku
 
-CREATE TABLE secondary_final AS
+CREATE TABLE t_david_hruby_project_SQL_secondary_final AS
 SELECT
 	e.`year`,
 	e.country,
@@ -15,5 +15,5 @@ JOIN countries c
 	AND e.`year` BETWEEN 2006 AND 2018
 ORDER BY e.country, e.year;
 
-SELECT * FROM secondary_final;
+SELECT * FROM t_david_hruby_project_SQL_secondary_final;
 -- Zde je dokončená sekundární tabulka s všemi sloupci, které byli v zadání
