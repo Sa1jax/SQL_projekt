@@ -5,7 +5,7 @@ Analýza růstu cen a mezd v ČR
 Tento projekt se zaměřuje na analýzu ekonomických dat. Poskytl jsem datasety, které jsem použil a scripty, které vám umožní analyzovat vývoj cen potravin, mezd a HDP mezi lety 2006-2018. Cílem je poskytnout nástroje pro provedení analýzy a odpovědět na specifické otázky týkající se ekonomických trendů.
 
 ### Struktura projektu
-Projekt obsahuje toto **README**, editorconfig, kde jsem nastavil pravidla řádkování pro jednotlivé scripty, **průvodní listinu**, kde popisuji postupy a metody, které jsem během analýzy dat použil a dvě složky s názvem **scripts/** a **used_datasets**. Uvnitř složky scripts se nacházejí **SQL scripty**, které vytvářejí a zobrazují jednotlivé tabulky, ze kterých jsem vytvářel odpovědi na otázky. Ve složce used_datasets jsou už jednotlivé datasety ve formátu **CSV**.
+Projekt obsahuje toto **README**, .gitignore, **průvodní listinu**, kde popisuji postupy a metody, které jsem během analýzy dat použil a dvě složku s názvem **scripts/**. Uvnitř složky scripts se nacházejí **SQL scripty**, které vytvářejí a zobrazují jednotlivé tabulky, ze kterých jsem vytvářel odpovědi na otázky.
 
 ### Návod k použití
 ##### **1. Stažení a příprava**
