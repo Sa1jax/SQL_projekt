@@ -4,7 +4,8 @@
 -- Vytvoření cte a výpočet procentuální změny oproti předchozímu roku
 -- Následné vytvoření temporární tabulky, abych mohl tabulku použít pro výpočet geometrického průměru
 SELECT DISTINCT year_, industry, wage
-FROM t_david_hruby_project_sql_primary_final pf 
+FROM t_david_hruby_project_sql_primary_final pf
+c3533b2 (Uprav aliasu u primární tabulky na 7. řádku)
 ORDER BY industry, year_;
 
 CREATE TEMPORARY TABLE temp_wage_growth AS
