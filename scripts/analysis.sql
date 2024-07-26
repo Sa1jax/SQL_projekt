@@ -2,9 +2,14 @@
 
 -- 1. Rostou v průběhu let mzdy ve všech odvětvích, nebo v některých klesají?
 -- Vytvoření cte a výpočet procentuální změny oproti předchozímu roku
--- Následné vytvoření view, abych ho mohl použít pro výpočet geometrického průměru
-CREATE VIEW v_wage_growth AS
-WITH cte1 AS (
+-- Následné vytvoření temporární tabulky, abych mohl tabulku použít pro výpočet geometrického průměru
+SELECT DISTINCT year_, industry, wage
+FROM t_david_hruby_project_sql_primary_final pf 
+ORDER BY industry, year_;
+
+CREATE TEMPORARY TABLE temp_wage_growth AS
+WITH industry_wages AS (
+09caef3 (Udělej aliasy u CTE přehlednější)
 	SELECT DISTINCT year_, industry, wage 
 	FROM t_david_hruby_project_SQL_primary_final pf
 	ORDER BY industry, year_
@@ -19,7 +24,7 @@ SELECT
 		WHEN (wage - LAG(wage, 1) OVER(PARTITION BY industry ORDER BY year_)) / LAG(wage, 1) OVER(PARTITION BY industry ORDER BY year_) * 100 IS NULL THEN 1
 		ELSE 1 + (wage - LAG(wage, 1) OVER(PARTITION BY industry ORDER BY year_)) / LAG(wage, 1) OVER(PARTITION BY industry ORDER BY year_)
 	END AS growth_factor
-FROM cte1;
+FROM industry_wages;
 -- Ještě jsem přidal sloupec growth_factor, protože budu počítat geometrický průměr
 
 -- Výpočet geometrického průměru
@@ -56,19 +61,19 @@ avg_price_06_18 AS (
 		AND food IN ('Chléb konzumní kmínový', 'Mléko polotučné pasterované')
 )
 SELECT 
-	a.*,
-	b.avg_wage,
-	ROUND(b.avg_wage / a.avg_price) AS purchasing_power
-FROM avg_price_06_18 a
-JOIN avg_wage_06_18 b
-	ON a.year_ = b.year_;
+	avgp.*,
+	avgw.avg_wage,
+	ROUND(avgw.avg_wage / avgp.avg_price) AS purchasing_power
+FROM avg_price_06_18 avgp
+JOIN avg_wage_06_18 avgw
+	ON avgp.year_ = avgw.year_;
 -- Zde je výsledný dotaz, který ukazuje kolik litrů mléka a kilogramů chleba si mohl člověk koupit za průměrnou mzdu v těchto letech
 
 
 -- 3. Která kategorie potravin zdražuje nejpomaleji (je u ní nejnižší percentuální meziroční nárůst)?
 -- Vytvoření view, které obsahuje procentuální změnu a growth_factor pro výpočet geometrického průměru
 CREATE TEMPORARY TABLE temp_food_price_growth AS
-WITH cte2 AS (
+WITH grocery_prices AS (
 	SELECT DISTINCT 
 		year_,
 		food,
@@ -85,7 +90,7 @@ SELECT
 		WHEN (price - LAG(price, 1) OVER(PARTITION BY food ORDER BY year_)) / LAG(price, 1) OVER(PARTITION BY food ORDER BY year_) * 100 IS NULL THEN 1 
 		ELSE ROUND(1 + (price - LAG(price, 1) OVER(PARTITION BY food ORDER BY year_)) / LAG(price, 1) OVER(PARTITION BY food ORDER BY year_), 4)
 	END AS growth_factor
-FROM cte2
+FROM grocery_prices
 ORDER BY food, year_;
 
 -- Výpočet geometrického průměru a tvorba dotazu pro odpověď na třetí otázku
@@ -134,7 +139,7 @@ ORDER BY w.year_;
 	  projeví se to na cenách potravin či mzdách ve stejném nebo násdujícím roce výraznějším růstem? */
 -- Vytvoření dočasné tabulky pro uchování tabulky s růstem hdp
 CREATE TEMPORARY TABLE temp_gdp_growth AS
-WITH cte3 AS (
+WITH cte_gdp AS (
 	SELECT DISTINCT
 		year_,
 		GDP
@@ -146,7 +151,7 @@ SELECT
 		WHEN (GDP - LAG(GDP, 1) OVER(ORDER BY year_)) / LAG(GDP, 1) OVER(ORDER BY year_) * 100 IS NULL THEN 0 
 		ELSE ROUND((GDP - LAG(GDP, 1) OVER(ORDER BY year_)) / LAG(GDP, 1) OVER(ORDER BY year_) * 100, 2)
 	END AS gdp_growth
-FROM cte3;
+FROM cte_gdp;
 
 -- Vytvoření dotazu pro odpověď na otázku číslo 5
 WITH cte_wage2 AS (
