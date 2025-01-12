@@ -1,4 +1,4 @@
-# SQL_projekt
+# SQL-projekt
 Analýza růstu cen a mezd v ČR
 
 ### Úvod
